@@ -29,6 +29,7 @@ export default class Game {
         this.engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
         this.ping = 0;
         this.done = false;
+        this.soundManager = null;
     }
 
     createScene() {
@@ -123,10 +124,7 @@ export default class Game {
                 this);
             this.players.push(player);
             player.addToScene(this.scene, this.playerMats[i]);
-
         }
-        //var player = new Player(1, 0, 20, 0, this);
-
     }
 
     createProjectile (ownerIndex, type, posX, posZ, rotY){
@@ -134,6 +132,7 @@ export default class Game {
         proj.addToScene(this.scene);
         this.projectiles.push(proj);
         //console.log("created projectile ", proj);
+        this.soundManager.playFire(posX, posZ);
 
         this.socket.emit("ProjectileCreated", {
             randId: proj.basics.randId,
@@ -150,6 +149,8 @@ export default class Game {
         proj.basics.randId = data.randId;
         proj.addToScene(this.scene);
         this.projectiles.push(proj);
+        this.soundManager.playFire(data.posX, data.posZ);
+
     }
 
     moveProjectiles(cyclems){
@@ -268,19 +269,33 @@ export default class Game {
                 projectileOwner: projectileOwner
             };
             //console.log("Hit player", report);
+            this.soundManager.playHit(this.players[this.localPlayerIndex].dynamic.posX,this.players[this.localPlayerIndex].dynamic.posZ);
+            this.showHitExplosion(this.players[playerIndex].dynamic.posX, this.players[playerIndex].dynamic.posZ);
             this.socket.emit("PlayerHit", report);
             this.updatePlayersForHit(playerIndex, projectileOwner)
         }
     }
     //Handle notification from net that a player was hit
     handlePlayerWasHit(report){
+        this.showHitExplosion(this.players[report.playerIndex].dynamic.posX, this.players[report.playerIndex].dynamic.posZ);
+        this.soundManager.playHit(this.players[report.playerIndex].dynamic.posX,this.players[report.playerIndex].dynamic.posZ);
         this.updatePlayersForHit(report.playerIndex, report.projectileOwner);
     }
 
     updatePlayersForHit(hitPlayerIndex, shootingPlayerIndex) {
         this.players[hitPlayerIndex].dynamic.points -= 50;
         this.players[shootingPlayerIndex].dynamic.points += 100;
-        this.players[hitPlayerIndex].dynamic.heath -= 25;
+        this.players[hitPlayerIndex].dynamic.health -= 25;
+
+        if (hitPlayerIndex === this.localPlayerIndex &&
+            this.players[hitPlayerIndex].dynamic.health <= 0){
+            this.players[hitPlayerIndex].dynamic.action = "flyToBase";
+            this.players[hitPlayerIndex].dynamic.msAtBase = 5000 + Date.now();
+            this.players[hitPlayerIndex].dynamic.startX = this.players[hitPlayerIndex].dynamic.posX;
+            this.players[hitPlayerIndex].dynamic.startZ = this.players[hitPlayerIndex].dynamic.posZ;
+            this.players[hitPlayerIndex].updateNeeded = true;
+            this.soundManager.playDie();
+        }
         //this.refreshScoreBoard();
     }
 
@@ -302,7 +317,7 @@ export default class Game {
             var timeLeft = minutesLeft + ":" + secondsLeft;
         }
 
-        var html = "<p>TIME> " + timeLeft + " | HEALTH> " + this.players[this.localPlayerIndex].dynamic.heath + " | SCORES> ";
+        var html = "<p>TIME> " + timeLeft + " | HEALTH> " + this.players[this.localPlayerIndex].dynamic.health + " | SCORES> ";
         for (var i = 0; i < this.players.length; i++) {
             var name = this.players[i].basics.name;
             if (i === this.localPlayerIndex) {
@@ -328,7 +343,7 @@ export default class Game {
         });
 
         this.socket.on('GameSet', (data) => {
-            console.log("Game set ", data);
+            //console.log("Game set ", data);
             //this.refreshScoreBoard();
             this.runGame(data);
         });
@@ -364,6 +379,7 @@ export default class Game {
         this.endTime = Date.now() + 3*60*1000;
 
         this.createPlayers(data.playerNames);
+        this.soundManager.localPlayer = this.players[this.localPlayerIndex];
         this.attachCameraToPlayer();
 
         this.engine.runRenderLoop( () => {
@@ -379,5 +395,46 @@ export default class Game {
             this.scene.render();
         });
 
+    }
+
+    showHitExplosion(posX, posZ){
+        // Create a particle system
+        var particleSystem = new BABYLON.ParticleSystem("particles", 2000, this.scene);
+        particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+        particleSystem.disposeOnStop = true;
+        particleSystem.targetStopDuration = 0.3;
+
+        //Texture of each particle
+        particleSystem.particleTexture = new BABYLON.Texture("/img/flare.png", this.scene);
+
+        // Where the particles come from
+        particleSystem.emitter = new BABYLON.Vector3(posX, 3.0, posZ); // the starting location
+
+        // Colors of all particles
+        particleSystem.color1 = new BABYLON.Color4(1.0, 0, 0, 1.0);
+        particleSystem.color2 = new BABYLON.Color4(1.0, 0, 0, 1.0);
+        particleSystem.colorDead = new BABYLON.Color4(1.0, 1.0, 0, 0);
+
+        // Size of each particle (random between...
+        particleSystem.minSize = 0.5;
+        particleSystem.maxSize = 1.0;
+
+        // Life time of each particle (random between...
+        particleSystem.minLifeTime = 10.0;
+        particleSystem.maxLifeTime = 15.0;
+
+        // Emission rate
+        particleSystem.emitRate = 500;
+
+        /******* Emission Space ********/
+        particleSystem.createPointEmitter(new BABYLON.Vector3(-7, 8, 3), new BABYLON.Vector3(7, -8, -3));
+
+        // Speed
+        particleSystem.minEmitPower = 1.0;
+        particleSystem.maxEmitPower = 3.0;
+        particleSystem.updateSpeed = 0.02;
+
+        // Start the particle system
+        particleSystem.start();
     }
 }

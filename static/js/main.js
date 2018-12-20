@@ -3,6 +3,7 @@
 import Game from "./Game.js";
 import Map from "./Map.js";
 import Player from "./Player.js";
+import SoundManager from "./SoundManager.js";
 
 
 var canvas = document.getElementById("renderCanvas"); // Get the canvas element
@@ -10,6 +11,7 @@ var canvas = document.getElementById("renderCanvas"); // Get the canvas element
 
 var game = new Game(canvas);
 game.map = new Map(1);
+game.soundManager = new SoundManager();
 
 game.createScene();
 game.map.addToScene(game.scene, game.playerMats);
@@ -17,8 +19,6 @@ game.scene.render();
 
 game.socket = io();
 game.setUpSocketCallbacks();
-
-//game.socket.emit('newUser', {name: "Bob"});
 
 function joinGame(){
 }

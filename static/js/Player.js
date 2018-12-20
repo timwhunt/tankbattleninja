@@ -13,11 +13,14 @@ export default class Player {
         this.dynamic = {
             playerIndex: playerIndex, //not really dynamic, but here for easy identification
             points: 0,
-            heath: 100,
+            health: 100,
             action: "stop",
             posX: posX,
             posZ: posZ,
-            rotY: rotY
+            rotY: rotY,
+            msAtBase: 0, //ms for end of flight for return to base
+            startX: 0,
+            startZ: 0
         };
         this.nextShotTime = 0;
         this.updateNeeded = false; //true means server needs to be given an update
@@ -52,6 +55,9 @@ export default class Player {
     }
 
     processKeys(keys) {
+        if (this.dynamic.action === "flyToBase") {
+            return;
+        }
         var startingAction = this.dynamic.action;
         if (keys.forward) {
             if (keys.left) {
@@ -92,63 +98,95 @@ export default class Player {
     }
 
     move(cyclems, map) {
-        var startX = this.dynamic.posX;
-        var startZ = this.dynamic.posZ;
-        var dist = this.basics.speed * cyclems / 1000;
-        var rot = this.basics.rotSpeed * cyclems / 1000;
-        if (this.dynamic.action.startsWith("Forward")) {
-            this.dynamic.posZ -= dist * Math.cos(this.dynamic.rotY);
-            this.dynamic.posX -= dist * Math.sin(this.dynamic.rotY);
-        }
-        if (this.dynamic.action.startsWith("Back")) {
-            this.dynamic.posZ += dist * Math.cos(this.dynamic.rotY);
-            this.dynamic.posX += dist * Math.sin(this.dynamic.rotY);
-        }
-        if (this.dynamic.action.endsWith("Left")) {
-            this.dynamic.rotY -= rot;
-        }
-        if (this.dynamic.action.endsWith("Right")) {
-            this.dynamic.rotY += rot;
-        }
 
-        //if local player, check for obstacle collision and map boundry
-        if (this.dynamic.playerIndex === this.game.localPlayerIndex) {
-            if (this.obstacleCollision(map.obstacles) ||
-                this.dynamic.posX < -map.sizeX/2 ||
-                this.dynamic.posX > map.sizeX/2 ||
-                this.dynamic.posZ < -map.sizeZ/2 ||
-                this.dynamic.posZ > map.sizeZ/2
-            ){
-                this.dynamic.posX = startX;
-                this.dynamic.posZ = startZ;
+        if (this.dynamic.action === "flyToBase") {
 
-                //fix action value
-                var newAction=this.dynamic.action;
-                switch(this.dynamic.action) {
-                    case "Forward":
-                        newAction = "Stop";
-                        break;
-                    case "ForwardRight":
-                        newAction = "Right";
-                        break;
-                    case "ForwardLeft":
-                        newAction = "Left";
-                        break;
-                    case "Back":
-                        newAction = "Stop";
-                        break;
-                    case "BackRight":
-                        newAction = "Right";
-                        break;
-                    case "BackLeft":
-                        newAction = "Left";
-                        break;
+            if (Date.now() >= this.dynamic.msAtBase) {
+                this.dynamic.action = "stop";
+                this.dynamic.health = 100;
+                this.rootmesh.position.y = 3;
+                this.dynamic.posX = map.basePos[this.dynamic.playerIndex][0];
+                this.dynamic.posZ = map.basePos[this.dynamic.playerIndex][1];
+                if (this.dynamic.playerIndex === this.game.localPlayerIndex) {
+                    this.updateNeeded = true;
                 }
-                this.dynamic.action = newAction;
+
+            } else {
+                var dX = map.basePos[this.dynamic.playerIndex][0] - this.dynamic.startX;
+                var dZ = map.basePos[this.dynamic.playerIndex][1] - this.dynamic.startZ;
+                var dt = (5000 - (this.dynamic.msAtBase - Date.now())) / 5000;
+
+                this.dynamic.posX = this.dynamic.startX + dt * dX;
+                this.dynamic.posZ = this.dynamic.startZ + dt * dZ;
+
+                this.dynamic.rotY += cyclems/1000 * 3;
+
+                this.rootmesh.position.y = 3 + 50 * Math.sin(Math.PI * (this.dynamic.msAtBase - Date.now()) / 5000);
+
+
+                this.rootmesh.position.x = this.dynamic.posX;
+                this.rootmesh.position.z = this.dynamic.posZ;
+                this.rootmesh.rotation.y = this.dynamic.rotY;
+
+            }
+
+        } else { //not fly to base
+            var startX = this.dynamic.posX;
+            var startZ = this.dynamic.posZ;
+            var dist = this.basics.speed * cyclems / 1000;
+            var rot = this.basics.rotSpeed * cyclems / 1000;
+            if (this.dynamic.action.startsWith("Forward")) {
+                this.dynamic.posZ -= dist * Math.cos(this.dynamic.rotY);
+                this.dynamic.posX -= dist * Math.sin(this.dynamic.rotY);
+            }
+            if (this.dynamic.action.startsWith("Back")) {
+                this.dynamic.posZ += dist * Math.cos(this.dynamic.rotY);
+                this.dynamic.posX += dist * Math.sin(this.dynamic.rotY);
+            }
+            if (this.dynamic.action.endsWith("Left")) {
+                this.dynamic.rotY -= rot;
+            }
+            if (this.dynamic.action.endsWith("Right")) {
+                this.dynamic.rotY += rot;
+            }
+
+            //if local player, check for obstacle collision and map boundry
+            if (this.dynamic.playerIndex === this.game.localPlayerIndex) {
+                if (this.obstacleCollision(map.obstacles) ||
+                    this.dynamic.posX < -map.sizeX/2 ||
+                    this.dynamic.posX > map.sizeX/2 ||
+                    this.dynamic.posZ < -map.sizeZ/2 ||
+                    this.dynamic.posZ > map.sizeZ/2
+                ){
+                    this.dynamic.posX = startX;
+                    this.dynamic.posZ = startZ;
+
+                    //fix action value
+                    var newAction=this.dynamic.action;
+                    switch(this.dynamic.action) {
+                        case "Forward":
+                            newAction = "Stop";
+                            break;
+                        case "ForwardRight":
+                            newAction = "Right";
+                            break;
+                        case "ForwardLeft":
+                            newAction = "Left";
+                            break;
+                        case "Back":
+                            newAction = "Stop";
+                            break;
+                        case "BackRight":
+                            newAction = "Right";
+                            break;
+                        case "BackLeft":
+                            newAction = "Left";
+                            break;
+                    }
+                    this.dynamic.action = newAction;
+                }
             }
         }
-
-
 
          this.rootmesh.position.x = this.dynamic.posX;
          this.rootmesh.position.z = this.dynamic.posZ;

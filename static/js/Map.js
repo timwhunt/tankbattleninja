@@ -19,17 +19,47 @@ export default class Map {
                 //console.log("x " + x);
                 if (mapData[z][x] === 'b'){
                     //box
-                    this.obstacles.push(new Obstacle("box",x*5-250,z*5-250,x*5+5-250,z*5+5-250,10));
+                    var expX = this.expandX(z,x,mapData);
+                    var expZ = 0;
+                    if (expX === 0) {
+                        expZ = this.expandZ(z,x,mapData);
+                    }
+                    this.obstacles.push(new Obstacle("box",x*5-250,z*5-250,(x+expX)*5+5-250,(z+expZ)*5+5-250,10));
                 } else if (mapData[z][x] === 'B'){
                     //box
                     this.obstacles.push(new Obstacle("box",x*5-250,z*5-250,x*5+5-250,z*5+5-250,15));
                 }
             }
         }
-
+        console.log("Created map with " + this.obstacles.length + " Obstacles");
 
         //place bases
         this.basePos.push([-200,0], [200,0], [0,-200], [0,200]);
+    }
+
+    expandX(z,x, mapData){
+        var marker = mapData[z][x];
+        var count = 0;
+        while (mapData[z][x + count + 1] === marker) {
+            mapData[z] = this.clearChar(mapData[z], x + count + 1);
+            count++;
+        }
+        return count;
+    }
+
+    expandZ(z,x, mapData){
+        var marker = mapData[z][x];
+        var count = 0;
+        while (z + count + 1 < mapData.length && mapData[z + count + 1][x] === marker) {
+            mapData[z + count + 1] = this.clearChar(mapData[z + count + 1], x);
+            count++;
+        }
+        return count;
+    }
+
+
+    clearChar(str, indx) {
+        return str.substr(0,indx) + " " + str.substr(indx+1);
     }
 
     addToScene(scene, baseMats) {
@@ -94,25 +124,25 @@ export default class Map {
         out.push("                                                                                                    ");
         out.push("bbbbbbbbbb                                                                                bbbbbbbbbb"); //tenth 10th
         out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
         out.push("                                                                                                    "); //tenth 20th
-        out.push("              b                                                                      b              ");
-        out.push("             b                                                                        b             ");
-        out.push("            b                                                                          b            ");
-        out.push("           b                                                                            b           ");
-        out.push("          b              bbbbbbbbbbbbbbbbbbbbbbb    bbbbbbbbbbbbbbbbbbbbbbb              b          ");
-        out.push("         b                                                                                b         ");
-        out.push("        b                                                                                  b        ");
-        out.push("       b                                                                                    b       ");
-        out.push("      b                                                                                      b      ");
-        out.push("     b                                                                                        b     "); //tenth 30th
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                         bbbbbbbbbbbbbbbbbbbbbbb    bbbbbbbbbbbbbbbbbbbbbbb                         ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    "); //tenth 30th
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
@@ -152,25 +182,25 @@ export default class Map {
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
-        out.push("     b                                                                                        b     "); //tenth 70th
-        out.push("      b                                                                                      b      ");
-        out.push("       b                                                                                    b       ");
-        out.push("        b                                                                                  b        ");
-        out.push("         b                                                                                b         ");
-        out.push("          b              bbbbbbbbbbbbbbbbbbbbbbb    bbbbbbbbbbbbbbbbbbbbbbb              b          ");
-        out.push("           b                                                                            b           ");
-        out.push("            b                                                                          b            ");
-        out.push("             b                                                                        b             ");
-        out.push("              b                                                                      b              ");
+        out.push("                                                                                                    "); //tenth 70th
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                         bbbbbbbbbbbbbbbbbbbbbbb    bbbbbbbbbbbbbbbbbbbbbbb                         ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
+        out.push("                                                                                                    ");
         out.push("                                                                                                    "); //tenth 80th
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
-        out.push("                                                                                                    ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
+        out.push("                              b                                      b                              ");
         out.push("                                                                                                    ");
         out.push("bbbbbbbbbb                                                                                bbbbbbbbbb"); //tenth 90th
         out.push("                                                                                                    ");
