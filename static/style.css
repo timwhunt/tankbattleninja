@@ -1,0 +1,113 @@
+html, body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial;
+}
+
+#welcome {
+    position: absolute;
+    top: 40px;
+    width: 80%;
+    left: 10%;
+    padding: 20px;
+    background-color: white;
+    border: 2px solid gray;
+    border-radius: 10px;
+    font-size: 1.25rem;
+}
+
+#waiting, #winner {
+    position: absolute;
+    top: 40px;
+    width: 50%;
+    left: 25%;
+    padding: 20px;
+    background-color: white;
+    border: 2px solid gray;
+    border-radius: 10px;
+    font-size: 1.25rem;
+    display: none;
+}
+
+
+.strong {
+    font-weight: bold;
+}
+
+#welcome h1, #welcome h2, #waiting h1, #winner, #winner h1 {
+    text-align: center;
+}
+
+#joinForm {
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+#nameInput {
+    font-size: 1.5rem;
+    border-radius: 5px;
+    border: 1px solid gray;
+}
+
+#joinBtn, #playAgainBtn {
+    font-size: 1.5rem;
+    border-radius: 5px;
+    border: 1px solid gray;
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+#debugDisplay {
+    position: absolute;
+    z-index: 100;
+    color: black;
+    bottom: 0px;
+    right: 0px;
+    padding: 5px;
+}
+
+#scoreboard {
+    position: absolute;
+    z-index: 100;
+    color: #ff7e2a;
+    font-size: 1.5rem;
+    font-family: Arial;
+    top: 0px;
+    left: 0px;
+    padding: 5px;
+}
+
+#scoreboard p {
+    margin:0px;
+}
+
+
+#stats {
+    position: absolute;
+    z-index: 100;
+    color: black;
+    bottom: 0px;
+    left: 0px;
+    padding: 5px;
+}
+
+span.player0 {
+    color: red;
+}
+span.player1 {
+    color: #00b100;
+}
+span.player2 {
+    color: blue;
+}
+span.player3 {
+    color: yellow;
+}
+

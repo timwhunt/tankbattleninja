@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tank Ninja</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="renderCanvas" touch-action="none"></canvas>
+    <div id="scoreboard"></div>
+    <div id="debugDisplay"></div>
+    <div id="stats"></div>
+    <div id="welcome">
+        <h1>Welcome to Tank Battle Ninja!</h1>
+        <h2>A 3D multiplayer tank battle game.</h2>
+        <table>
+            <tr>
+                <td width="60%">
+                    <h4>How to Play:</h4>
+                    <p>Your objective is to get the most points by shooting other tanks.
+                        You'll get 100 points for each opponent's tank you shoot. But watch out - you'll loose 50 points each time you are shot.
+                        If you loose all your health (aka die), you'll fly back to your base to start over.</p>
+                    <p>Games last three minutes, and the player with the most points at the end wins!</p>
+                </td>
+                <td width="40%">
+                    <h4>Controls: </h4>
+                    <ul>
+                        <li><span class="strong">Forward:</span> up arrow</li>
+                        <li><span class="strong">Back:</span> down arrow</li>
+                        <li><span class="strong">Left:</span> left arrow</li>
+                        <li><span class="strong">right:</span> right arrow</li>
+                        <li><span class="strong">Shoot:</span> space bar</li>
+                        <li><span class="strong">Overhead view:</span> 'x' key</li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+        <h2>Enter your name to join a game</h2>
+        <p id="joinForm">
+            <input type="text" id="nameInput" maxlength="10">
+            <button id="joinBtn">Join</button>
+        </p>
+    </div>
+    <div id="waiting">
+        <h1>Waiting for Players...</h1>
+    </div>
+    <div id="winner">
+        <h1 id="winner-text"></h1>
+        <button id="playAgainBtn">Play Again</button>
+    </div>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
