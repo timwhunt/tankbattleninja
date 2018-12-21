@@ -28,7 +28,7 @@ export default class Map {
                     this.obstacles.push(new Obstacle("box",x*5-250,z*5-250,(x+expX)*5+5-250,(z+expZ)*5+5-250,10));
                 } else if (mapData[z][x] === 'B'){
                     //box
-                    this.obstacles.push(new Obstacle("box",x*5-250,z*5-250,x*5+5-250,z*5+5-250,15));
+                    this.obstacles.push(new Obstacle("Box",x*5-250,z*5-250,x*5+5-250,z*5+5-250,15));
                 } else if (mapData[z][x] === 'P'){
                     //
                     this.obstacles.push(new Obstacle("poly",x*5-2.5-250,z*5-2.5-250,x*5+2.5+5-250,z*5+2.5+5-250,10));
@@ -107,6 +107,16 @@ export default class Map {
                 box.position.z = (this.obstacles[i].minZ + this.obstacles[i].maxZ)/2;
                 box.position.y = this.obstacles[i].height/2; //add half the height to sit on ground
                 box.material = boxMat;
+                box.freezeWorldMatrix();
+            } else if (this.obstacles[i].type === "Box"){
+                var box = BABYLON.MeshBuilder.CreateBox("Box" + i, {
+                    height: this.obstacles[i].height,
+                    width: this.obstacles[i].maxX - this.obstacles[i].minX,
+                    depth: this.obstacles[i].maxZ - this.obstacles[i].minZ});
+                box.position.x = (this.obstacles[i].minX + this.obstacles[i].maxX)/2;
+                box.position.z = (this.obstacles[i].minZ + this.obstacles[i].maxZ)/2;
+                box.position.y = this.obstacles[i].height/2; //add half the height to sit on ground
+                //box.material = boxMat;
                 box.freezeWorldMatrix();
             } else if (this.obstacles[i].type === "poly"){
                 var poly = BABYLON.MeshBuilder.CreatePolyhedron("poly" + i, {
