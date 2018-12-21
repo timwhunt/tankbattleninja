@@ -35,7 +35,7 @@ io.on('connection', function (socket) {
 
         socket.emit("Joined", {playerNumber: playerNum});
 
-        if (playerNum == 2) {
+        if (playerNum == 4) {
             partialGame.start();
             games.push(partialGame);
             partialGame = null;

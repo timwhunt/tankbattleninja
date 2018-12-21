@@ -262,7 +262,7 @@ export default class Game {
     }
     //notifies of player hit by projectile. Could be any player, not necessarily the local player
     reportPlayerHit(playerIndex, projectileId, projectileOwner) {
-        if (playerIndex === this.localPlayerIndex) { //only report if local player is hit
+        if (playerIndex === this.localPlayerIndex && playerIndex != projectileOwner) { //only report if local player is hit
             var report = {
                 playerIndex: playerIndex,
                 projectileId: projectileId,

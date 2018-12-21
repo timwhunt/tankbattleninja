@@ -32,20 +32,55 @@ export default class Player {
         var sphere = BABYLON.MeshBuilder.CreateSphere("player" + this.dynamic.playerIndex, {diameter: 2.5}, scene);
         this.rootmesh = sphere;
 
-        var cone = BABYLON.MeshBuilder.CreateCylinder("cone", {
-            diameterTop: 1,
-            diameterBottom: 3,
-            height: this.basics.length,
-            tessellation: 5
-        }, scene);
-        //cone.position.x = this.dynamic.posX;
-        //cone.position.z = this.dynamic.posZ;
-        //cone.position.y = 3;
-        cone.rotation.z = Math.PI / 2;
-        cone.rotation.y = -Math.PI / 2;
-        cone.convertToFlatShadedMesh();
-        cone.material = mat;
-        cone.parent = sphere;
+        var rightWingShape = [
+            new BABYLON.Vector3(0, 0, 2.5),
+            new BABYLON.Vector3(0, 0, -2.5),
+            new BABYLON.Vector3(2, 0, -1.0),
+            new BABYLON.Vector3(3, 0, -1.0),
+            new BABYLON.Vector3(3, 0, 2.0),
+            new BABYLON.Vector3(2, 0, 2.0),
+        ];
+
+        rightWingShape.push(rightWingShape[0]);
+
+        var rightWing = BABYLON.MeshBuilder.ExtrudePolygon("wing", {shape: rightWingShape, depth: 0.5}, scene);
+        rightWing.rotation.z = -0.25;
+        rightWing.position.y = 0.5;
+        rightWing.material = mat;
+        rightWing.parent = sphere;
+
+        var leftWingShape = [
+            new BABYLON.Vector3(0, 0, 2.5),
+            new BABYLON.Vector3(-2, 0, 2.0),
+            new BABYLON.Vector3(-3, 0, 2.0),
+            new BABYLON.Vector3(-3, 0, -1.0),
+            new BABYLON.Vector3(-2, 0, -1.0),
+            new BABYLON.Vector3(0, 0, -2.5),
+
+        ];
+
+        leftWingShape.push(leftWingShape[0]);
+
+        var leftWing = BABYLON.MeshBuilder.ExtrudePolygon("wing", {shape: leftWingShape, depth: 0.5}, scene);
+        leftWing.rotation.z = 0.25;
+        leftWing.position.y = 0.5;
+        leftWing.material = mat;
+        leftWing.parent = sphere;
+
+
+        /*
+                var cone = BABYLON.MeshBuilder.CreateCylinder("cone", {
+                    diameterTop: 1,
+                    diameterBottom: 3,
+                    height: this.basics.length,
+                    tessellation: 5
+                }, scene);
+                cone.rotation.z = Math.PI / 2;
+                cone.rotation.y = -Math.PI / 2;
+                cone.convertToFlatShadedMesh();
+                cone.material = mat;
+                cone.parent = sphere;
+        */
 
         sphere.position.x = this.dynamic.posX;
         sphere.position.z = this.dynamic.posZ;
@@ -123,14 +158,15 @@ export default class Player {
 
                 this.rootmesh.position.y = 3 + 50 * Math.sin(Math.PI * (this.dynamic.msAtBase - Date.now()) / 5000);
 
-
-                this.rootmesh.position.x = this.dynamic.posX;
-                this.rootmesh.position.z = this.dynamic.posZ;
-                this.rootmesh.rotation.y = this.dynamic.rotY;
+                // this.rootmesh.position.x = this.dynamic.posX;
+                // this.rootmesh.position.z = this.dynamic.posZ;
+                // this.rootmesh.rotation.y = this.dynamic.rotY;
 
             }
 
         } else { //not fly to base
+            this.rootmesh.position.y = 3; //make sure there's now leftover elevation from flying
+
             var startX = this.dynamic.posX;
             var startZ = this.dynamic.posZ;
             var dist = this.basics.speed * cyclems / 1000;
@@ -186,7 +222,7 @@ export default class Player {
                     this.dynamic.action = newAction;
                 }
             }
-        }
+        } //end of not flying
 
          this.rootmesh.position.x = this.dynamic.posX;
          this.rootmesh.position.z = this.dynamic.posZ;
