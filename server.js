@@ -7,6 +7,20 @@ var games = [];
 var sockets = {};
 var partialGame = null;
 
+
+//set up interval to delete old games
+setInterval(() =>{
+    var count = 0;
+    for (let i = 0; i < games.length; i++) {
+        if (Date.now() - games[i].startTime > 60000) {
+            games.splice(i,1);
+            count ++;
+        }
+    }
+    console.log("Deleted " + count + " old games");
+}, 60000);
+
+
 io.on('connection', function (socket) {
 
     socket.on('newUser', function (data) {
@@ -27,40 +41,6 @@ io.on('connection', function (socket) {
             partialGame = null;
         }
 
-        // if (waitingUserSocket == null) {
-        //     waitingUserSocket = socket;
-        //     waitingUserName = data.name;
-        //     socket.emit("wait");
-        // } else {
-        //     var newGame = createGame(waitingUserSocket, waitingUserName, socket, data.name);
-        //     games.push(newGame);
-        //     sockets[waitingUserSocket.id] = newGame;
-        //     sockets[socket.id] = newGame;
-        //     waitingUserSocket = null;
-        //     waitingUserName = "";
-        //
-        //     newGame.socket1.emit('gameSet', {num: 1, opponentName: newGame.name2});
-        //     newGame.socket2.emit('gameSet', {num: 2, opponentName: newGame.name1});
-        //
-        //     setTimeout(function(){
-        //         newGame.socket1.emit("ready", {rand2: rand2, rand3: rand3});
-        //         newGame.socket2.emit("ready", {rand2: rand2, rand3: rand3});
-        //
-        //         setTimeout(function(){
-        //             newGame.socket1.emit("go");
-        //             newGame.socket2.emit("go");
-        //         }, 4000);
-        //     }, 3000);
-
-                // io.emit("ready", {rand2: rand2, rand3: rand3});
-                // setTimeout(function(){
-                //     io.emit("go");
-                // }, 4000);
-        //}
-
-        // } else {
-        //     socket.emit("tooMany");
-        // }
     });
 
     socket.on('playerChanged', function (data) {
@@ -107,46 +87,12 @@ io.on('connection', function (socket) {
         socket.emit('Pong', data);
     });
 
+    socket.on('disconnect', function (data) {
+        //console.log("Disconnect socketId : " + socket.id);
+        delete sockets[socket.id];
+        //console.log("removed from socket map ", sockets)
 
-
-        /*
-            socket.on('chomp', function (data) {
-                var game = sockets[socket.id];
-                var points = 10;
-                if (data.type === "powerUp") {
-                    points = 100;
-                }
-                if (socket == game.socket1) {
-                    game.scores[0] += points;
-                    game.socket2.emit('clear-space', {row: data.row, col: data.col});
-                } else {
-                    game.scores[1] += points;
-                    game.socket1.emit('clear-space', {row: data.row, col: data.col});
-                }
-                game.socket1.emit('scores', {scores: game.scores});
-                game.socket2.emit('scores', {scores: game.scores});
-
-                //socket.broadcast.emit('player-data', {playerData: data.playerData});
-            });
-        */
-/*
-    socket.on('player-data', function (data) {
-        //send the data to the other player in the game
-        var game = sockets[socket.id];
-        if (socket == game.socket1) {
-            game.socket2.emit('player-data', {playerData: data.playerData});
-        } else {
-            game.socket1.emit('player-data', {playerData: data.playerData});
-        }
-        //console.log("player-data socketId : " + socket.id);
-        //socket.broadcast.emit('player-data', {playerData: data.playerData});
     });
-*/
-    // socket.on('disconnect', function (data) {
-    //     console.log("Disconnect socketId : " + socket.id);
-    //     var msg = users[socket.id] +" left the room";
-    //     io.emit('msg', { msg: msg, name: "Sys"});
-    // });
 
 });
 
@@ -155,6 +101,7 @@ class Game {
         this.name = name;
         this.playerSockets = [];
         this.playerNames = [];
+        this.startTime = 0;
     }
 
     addPlayer(name, socket) {
@@ -164,6 +111,7 @@ class Game {
     }
 
     start() {
+        this.startTime = Date.now();
         var data = {
             name: this.name,
             playerNames: this.playerNames
