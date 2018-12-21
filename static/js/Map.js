@@ -4,6 +4,7 @@ export default class Map {
         this.sizeZ = 500;
         this.obstacles = [];
         this.basePos = []; //x and z
+        this.rotating = [];
 
         // this.obstacles.push(new Obstacle("box",0,0,5,5,5));
         // this.obstacles.push(new Obstacle("box",10,10,15,15,25));
@@ -28,6 +29,9 @@ export default class Map {
                 } else if (mapData[z][x] === 'B'){
                     //box
                     this.obstacles.push(new Obstacle("box",x*5-250,z*5-250,x*5+5-250,z*5+5-250,15));
+                } else if (mapData[z][x] === 'P'){
+                    //
+                    this.obstacles.push(new Obstacle("poly",x*5-2.5-250,z*5-2.5-250,x*5+2.5+5-250,z*5+2.5+5-250,10));
                 }
             }
         }
@@ -78,6 +82,11 @@ export default class Map {
         boxMat.ambientColor = new BABYLON.Color3(0, 0, 0.1);
         boxMat.freeze();
 
+        var polyMat =  new BABYLON.StandardMaterial("polyMaterial", scene);
+        polyMat.diffuseColor = new BABYLON.Color3(0.5, 0, 0.5);
+        polyMat.ambientColor = new BABYLON.Color3(0.1, 0, 0.1);
+        polyMat.freeze();
+
         //add obstacles
         for (var i=0; i < this.obstacles.length; i++) {
             if (this.obstacles[i].type === "cone"){
@@ -99,6 +108,16 @@ export default class Map {
                 box.position.y = this.obstacles[i].height/2; //add half the height to sit on ground
                 box.material = boxMat;
                 box.freezeWorldMatrix();
+            } else if (this.obstacles[i].type === "poly"){
+                var poly = BABYLON.MeshBuilder.CreatePolyhedron("poly" + i, {
+                    type: 2,
+                    size: this.obstacles[i].height}, scene);
+                poly.position.x = (this.obstacles[i].minX + this.obstacles[i].maxX)/2;
+                poly.position.z = (this.obstacles[i].minZ + this.obstacles[i].maxZ)/2;
+                poly.position.y = this.obstacles[i].height*0.67;
+                poly.material = polyMat;
+                //poly.freezeWorldMatrix();
+                this.rotating.push(poly);
             }
         }
         //add bases
@@ -108,6 +127,14 @@ export default class Map {
             hoop.position.z = this.basePos[i][1];
             hoop.position.y = 0;
             hoop.material = baseMats[i];
+        }
+    }
+
+    rotateObjects(cyclems) {
+        var deltaRot = 1 * (cyclems/1000);
+        for (var i = 0; i < this.rotating.length; i++){
+            this.rotating[i].rotation.y += deltaRot;
+            this.rotating[i].rotation.z += deltaRot;
         }
     }
 
@@ -147,7 +174,7 @@ export default class Map {
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
-        out.push("  bbbbbbbbbbbbbbb                                                                  bbbbbbbbbbbbbbb  ");
+        out.push("  bbbbbbbbbbbbbbb                                 P                                bbbbbbbbbbbbbbb  ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
@@ -157,18 +184,18 @@ export default class Map {
         out.push("                        b                                                  b                        ");
         out.push("                        b                                                  b                        ");
         out.push("                        b                                                  b                        ");
-        out.push("                                            BbbbbbbbbbbbbbbbB                                       ");
+        out.push("                                          BbbbbbbbbbbbbbbbB                                         ");
         out.push("                                                                                                    ");
-        out.push("                                          B                   B                                     ");
-        out.push("                                          b                   b                                     ");
-        out.push("                                          b                   b                                     ");
-        out.push("                                          b                   b                                     "); //tenth 50th
-        out.push("                                          b                   b                                     ");
-        out.push("                                          b                   b                                     ");
-        out.push("                                          b                   b                                     ");
-        out.push("                                          B                   B                                     ");
+        out.push("                                        B                   B                                       ");
+        out.push("                                        b                   b                                       ");
+        out.push("                                        b                   b                                       ");
+        out.push("                                        b                   b                                       "); //tenth 50th
+        out.push("                                        b                   b                                       ");
+        out.push("                                        b                   b                                       ");
+        out.push("                                        b                   b                                       ");
+        out.push("                                        B                   B                                       ");
         out.push("                                                                                                    ");
-        out.push("                                            BbbbbbbbbbbbbbbbB                                       ");
+        out.push("                                          BbbbbbbbbbbbbbbbB                                         ");
         out.push("                        b                                                  b                        ");
         out.push("                        b                                                  b                        ");
         out.push("                        b                                                  b                        ");
@@ -177,7 +204,7 @@ export default class Map {
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
-        out.push("  bbbbbbbbbbbbbbb                                                                  bbbbbbbbbbbbbbb  ");
+        out.push("  bbbbbbbbbbbbbbb                                 P                                bbbbbbbbbbbbbbb  ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");
         out.push("                                                                                                    ");

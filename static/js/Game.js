@@ -181,6 +181,8 @@ export default class Game {
         } else {
             this.camera.heightOffset = 5;
         }
+
+        this.map.rotateObjects(cyclems);
     }
 
     checkPeriodicTasks(){
